@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Демо-сайт кофейни: главная с меню и контакты с формой брони. Пример работы.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23171110'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='20' text-anchor='middle' fill='%23c2cca4'%3EM%3C/text%3E%3C/svg%3E">
+<title>Кофейня Макет</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500&family=Spectral:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+/* Layout: журнальная сетка на 12 колонок, фото как главные якоря, много воздуха (80-140px между блоками), тонкие линии 1px вместо теней, одна инверсная плашка для контраста.
+   Палитра: молочный фон, тёплый чёрный текст, один акцент (оливковый) только для кнопок. Шрифты: Spectral (заголовки) и Onest (текст). */
+:root {
+  --bg: #fbf9f6;
+  --bg-top: #fbf9f6;
+  --surface: #f3efe8;
+  --ink: #1b1a17;
+  --muted: #6b665d;
+  --line: #ded9cf;
+  --accent: #3b4a2f;
+  --accent-ink: #fbf9f6;
+  --plate: #1b1a17;
+  --plate-ink: #fbf9f6;
+  --plate-muted: #b9b3a6;
+  --plate-line: #3a3731;
+  --font-serif: "Spectral", "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --font-sans: "Onest", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --section: clamp(72px, 11vw, 140px);
+  --gap: clamp(16px, 2.2vw, 28px);
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17110e; --bg-top: #0a0807; --surface: #201813; --ink: #f1ece4; --muted: #ab9f92; --line: #33291f;
+    --accent: #c2cca4; --accent-ink: #1b1a17;
+    --plate: #efebe3; --plate-ink: #1b1a17; --plate-muted: #5d584f; --plate-line: #cfc9bd;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17110e; --bg-top: #0a0807; --surface: #201813; --ink: #f1ece4; --muted: #ab9f92; --line: #33291f;
+  --accent: #c2cca4; --accent-ink: #1b1a17;
+  --plate: #efebe3; --plate-ink: #1b1a17; --plate-muted: #5d584f; --plate-line: #cfc9bd;
+  color-scheme: dark;
+}
+
+/* цвет живого статуса: ярче акцента, чтобы точка читалась как «онлайн» */
+:root { --live: #2fbf55; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --live: #5cf07f; } }
+:root[data-theme="dark"] { --live: #5cf07f; }
+
+* { box-sizing: border-box; }
+body {
+  /* тёплый кофейный фон: сверху глубже, к первому экрану плавно теплее */
+  background-color: var(--bg);
+  background-image: linear-gradient(180deg, var(--bg-top) 0%, var(--bg) 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 1200px;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+  padding-block: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1240px; margin: 0 auto; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+html[data-theme="dark"] :focus-visible { outline-color: var(--accent); }
+
+/* демо-пометка: тонкая строка, не баннер */
+.demo {
+  margin-left: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+  margin-right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  padding: 9px max(16px, env(safe-area-inset-right, 0px)) 9px max(16px, env(safe-area-inset-left, 0px));
+  border-bottom: 1px solid var(--line);
+  text-align: center; font-size: 12px; letter-spacing: .04em; color: var(--muted);
+}
+
+/* шапка */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding-block: 28px; }
+.brand { display: flex; align-items: baseline; gap: 12px; text-decoration: none; }
+.brand-name { font-family: var(--font-serif); font-weight: 400; font-size: 30px; letter-spacing: .005em; line-height: 1; }
+.brand-sub, .label { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.nav { display: flex; align-items: center; gap: 28px; }
+.nav a.link { text-decoration: none; font-size: 15px; padding-block: 4px; border-bottom: 1px solid transparent; }
+.nav a.link:hover { border-bottom-color: var(--ink); }
+.nav a.link[aria-current="page"] { border-bottom-color: var(--ink); }
+
+/* кнопки: единственный акцентный цвет */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 14px 26px; border: 1px solid var(--accent); border-radius: 2px;
+  background: var(--accent); color: var(--accent-ink);
+  font: 500 15px var(--font-sans); letter-spacing: .02em; text-decoration: none; cursor: pointer;
+  transition: background-color .3s ease, color .3s ease, border-color .3s ease, opacity .2s ease;
+}
+/* контурная кнопка для шапки: заливается акцентом при наведении */
+.btn.is-outline { background: transparent; color: var(--accent); border-color: var(--accent); }
+.btn.is-outline:hover { background: var(--accent); color: var(--accent-ink); opacity: 1; }
+.btn:hover { opacity: .88; }
+.btn.is-small { padding: 7px 14px; font-size: 13px; background: transparent; color: var(--ink); border-color: var(--line); }
+.btn.is-small:hover { border-color: var(--ink); opacity: 1; }
+.textlink { background: none; border: 0; padding: 0; font: 500 15px var(--font-sans); color: var(--ink); cursor: pointer; border-bottom: 1px solid var(--ink); padding-bottom: 2px; text-decoration: none; transition: color .3s ease, border-color .3s ease; }
+.textlink:hover, .textlink:focus-visible { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* типографика */
+h1, h2 { font-family: var(--font-serif); font-weight: 300; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2.6rem, 7.4vw, 7rem); line-height: 1; letter-spacing: -.025em; }
+h2 { font-size: clamp(2rem, 4.6vw, 3.75rem); line-height: 1.05; letter-spacing: -.02em; }
+h1 em, h2 em { font-style: italic; font-weight: 300; }
+.lead { font-size: 18px; line-height: 1.6; color: var(--muted); margin: 0; max-width: 40ch; }
+p { margin: 0; }
+
+/* сетка */
+.grid { display: grid; grid-template-columns: minmax(0, 1fr); column-gap: var(--gap); row-gap: var(--gap); }
+.section { padding-top: var(--section); }
+
+/* заглушки под фото: тональные поля с виньеткой и зерном */
+.photo { position: relative; margin: 0; }
+.frame {
+  position: relative; overflow: hidden; border-radius: 2px; isolation: isolate;
+  aspect-ratio: var(--ratio, 4 / 5); max-width: 100%; background: #2a241e;
+}
+.frame::before { content: ""; position: absolute; inset: 0; z-index: 1; background: radial-gradient(120% 95% at 50% 42%, transparent 42%, rgba(0, 0, 0, .5) 100%); }
+.frame::after { content: ""; position: absolute; inset: 0; z-index: 2; background-image: var(--grain); background-size: 220px 220px; opacity: .3; mix-blend-mode: overlay; pointer-events: none; }
+.frame .tag { position: absolute; left: 18px; bottom: 16px; z-index: 3; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: rgba(255, 255, 255, .72); }
+.p-a { background: radial-gradient(55% 65% at 22% 18%, rgba(214, 170, 110, .7), transparent 62%), radial-gradient(45% 50% at 85% 85%, rgba(70, 52, 38, .9), transparent 70%), linear-gradient(165deg, #3a2f26, #17130f); }
+.p-b { background: radial-gradient(70% 60% at 50% 35%, rgba(224, 205, 172, .85), transparent 75%), linear-gradient(180deg, #a08c6e, #5f5240); }
+.p-c { background: radial-gradient(60% 60% at 70% 25%, rgba(165, 176, 128, .55), transparent 65%), linear-gradient(170deg, #4a5340, #1f2419); }
+.p-d { background: radial-gradient(50% 55% at 30% 70%, rgba(196, 124, 72, .5), transparent 65%), linear-gradient(160deg, #2e231c, #100d0a); }
+.caption { margin-top: 12px; font-size: 13px; color: var(--muted); }
+
+/* главная: первый экран */
+.hero { padding-top: clamp(28px, 5vw, 64px); position: relative; isolation: isolate; }
+/* большое размытое свечение акцентного цвета под первым экраном */
+.hero::before { content: ""; position: absolute; z-index: -1; left: -6%; top: -10%; width: 62%; aspect-ratio: 1; border-radius: 50%; background: var(--accent); filter: blur(160px); opacity: .07; pointer-events: none; }
+.hero h1 { max-width: 12ch; font-size: clamp(2.4rem, 4.6vw, 4.4rem); line-height: 1.04; }
+.hero-side { display: flex; flex-direction: column; gap: 28px; justify-content: flex-end; }
+.hero-actions { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+.open { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
+.open i { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--live); flex: none; }
+.open i::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--live); animation: ping 2s cubic-bezier(0, 0, .2, 1) infinite; }
+@keyframes ping { 0% { transform: scale(1); opacity: .6; } 75%, 100% { transform: scale(3.2); opacity: 0; } }
+
+/* анимированная сцена: кофе наливается в стакан (цикл 9 с) */
+.bgscene { position: fixed; inset: 0; z-index: -1; pointer-events: none; perspective: 1400px; opacity: .2; overflow: hidden; }
+.bgscene svg { position: absolute; inset: 0; margin: auto; width: min(1200px, 150vw); height: min(960px, 120vw); transition: transform .5s ease-out; }
+.wrap { position: relative; }
+.level { animation: fill 9s cubic-bezier(.45, 0, .25, 1) infinite; }
+.stream { transform-box: fill-box; transform-origin: 50% 0; animation: pour 9s ease-in-out infinite; }
+.ripple { transform-box: fill-box; transform-origin: center; animation: ripple 1.2s ease-out infinite; }
+.st { opacity: 0; animation: steam 9s ease-in-out infinite; }
+.st2 { animation-delay: .7s; }
+@keyframes fill { 0%, 5% { transform: translateY(200px); opacity: 1; } 68% { transform: translateY(0); opacity: 1; } 92% { transform: translateY(0); opacity: 1; } 99% { transform: translateY(0); opacity: 0; } 100% { transform: translateY(200px); opacity: 0; } }
+@keyframes pour { 0% { transform: scaleY(0); } 6%, 66% { transform: scaleY(1); } 70%, 100% { transform: scaleY(0); transform-origin: 50% 100%; } }
+@keyframes ripple { 0% { transform: scale(.6); opacity: .9; } 100% { transform: scale(2.4); opacity: 0; } }
+@keyframes steam { 0%, 66% { opacity: 0; transform: translateY(6px); } 78% { opacity: .9; } 98%, 100% { opacity: 0; transform: translateY(-14px); } }
+@media (prefers-reduced-motion: reduce) { .level, .stream, .ripple, .st { animation: none; } .stream, .ripple { display: none; } .st { opacity: .6; } .bgscene svg { transition: none; } }
+
+/* история */
+.story-text { display: flex; flex-direction: column; gap: 32px; align-self: center; }
+.story-text p.big { font-family: var(--font-serif); font-weight: 300; font-size: clamp(1.5rem, 2.8vw, 2.25rem); line-height: 1.25; letter-spacing: -.01em; text-wrap: balance; }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap); }
+.facts div { border-top: 1px solid var(--line); padding-top: 14px; font-size: 14px; color: var(--muted); }
+.facts b { display: block; color: var(--ink); font-weight: 500; font-size: 15px; margin-bottom: 4px; }
+
+/* меню */
+.menu-head { display: flex; align-items: end; justify-content: space-between; gap: var(--gap); flex-wrap: wrap; padding-bottom: clamp(32px, 5vw, 56px); }
+.menu-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(40px, 6vw, 56px) clamp(48px, 8vw, 112px); }
+.group { display: flex; flex-direction: column; gap: 4px; margin-bottom: clamp(32px, 5vw, 56px); }
+.group > .label { padding-bottom: 14px; border-bottom: 1px solid var(--ink); color: var(--ink); display: flex; justify-content: space-between; gap: 12px; }
+.item { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.item .name { font-family: var(--font-serif); font-size: 21px; font-weight: 400; line-height: 1.25; min-width: 0; }
+.item .note { display: block; font-family: var(--font-sans); font-size: 13px; color: var(--muted); margin-top: 2px; }
+.price { font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 15px; }
+
+/* бизнес-ланч: инверсная плашка */
+.plate { background: var(--plate); color: var(--plate-ink); border-radius: 2px; padding: clamp(28px, 5vw, 64px); display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; position: relative; isolation: isolate; overflow: hidden; }
+.plate::after { content: ""; position: absolute; inset: 0; z-index: -1; background-image: var(--grain); background-size: 220px 220px; opacity: .12; mix-blend-mode: overlay; pointer-events: none; }
+.plate .label { color: var(--plate-muted); }
+.plate h2 { margin-top: 10px; }
+.courses { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap); }
+.courses div { border-top: 1px solid var(--plate-line); padding-top: 14px; font-size: 15px; }
+.courses b { display: block; font-weight: 500; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--plate-muted); margin-bottom: 6px; }
+.lunch-price { font-family: var(--font-serif); font-weight: 300; font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1; letter-spacing: -.02em; }
+.lunch-price small { font-family: var(--font-sans); font-size: 14px; letter-spacing: 0; color: var(--plate-muted); margin-left: 8px; }
+
+/* контакты */
+.page-head { padding-top: clamp(28px, 5vw, 64px); }
+.rows { display: flex; flex-direction: column; }
+.row { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 22px 0; border-top: 1px solid var(--line); }
+.row:last-child { border-bottom: 1px solid var(--line); }
+.row .label { flex: 0 0 140px; }
+.row .val { flex: 1 1 220px; min-width: 0; font-family: var(--font-serif); font-size: 24px; line-height: 1.3; overflow-wrap: anywhere; }
+.row .val small { display: block; font-family: var(--font-sans); font-size: 14px; color: var(--muted); margin-top: 4px; }
+.hours { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+.hours td { padding: 4px 0; }
+.hours td:last-child { text-align: right; }
+.map { margin: 0; border: 1px solid var(--line); border-radius: 2px; background: var(--surface); overflow: hidden; display: flex; flex-direction: column; min-height: 360px; }
+.map svg { display: block; width: 100%; flex: 1; min-height: 300px; }
+.map figcaption { padding: 12px 16px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); background: var(--bg); }
+.m-line { stroke: var(--line); stroke-width: 1; fill: none; }
+.m-main { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+.m-block { fill: none; stroke: var(--line); stroke-width: 1; }
+.m-ring { fill: none; stroke: var(--accent); stroke-width: 1; }
+.m-dot { fill: var(--accent); }
+.m-text { fill: var(--ink); font: 500 11px var(--font-sans); letter-spacing: .12em; }
+
+.form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px var(--gap); margin-top: clamp(32px, 5vw, 56px); }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field label { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.field input { font: 400 18px var(--font-sans); color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid var(--ink); border-radius: 0; padding: 10px 0; width: 100%; min-width: 0; }
+.field input:focus-visible { outline: 0; border-bottom-width: 2px; padding-bottom: 9px; }
+.consent { grid-column: 1 / -1; display: flex; gap: 12px; align-items: flex-start; font-size: 14px; color: var(--muted); }
+.consent input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--accent); flex: none; }
+.form-actions { grid-column: 1 / -1; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+.status { font-size: 14px; color: var(--muted); min-height: 1.6em; }
+
+/* подвал: та же инверсная плашка */
+.foot { margin-top: var(--section); margin-bottom: clamp(16px, 3vw, 32px); }
+.foot .plate { gap: 48px; }
+.foot h2 { max-width: 16ch; }
+.foot-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap); font-size: 15px; }
+.foot-cols div { border-top: 1px solid var(--plate-line); padding-top: 14px; }
+.legal { font-size: 12px; color: var(--plate-muted); line-height: 1.6; }
+
+/* десктоп: журнальная асимметрия */
+@media (min-width: 861px) {
+  .grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .hero-side { grid-column: 1 / span 5; grid-row: 1; padding-right: 16px; }
+  .hero-photo { grid-column: 6 / -1; grid-row: 1; }
+  .story-photo { grid-column: 2 / span 4; }
+  .story-text { grid-column: 7 / span 6; }
+  .space-a { grid-column: 1 / span 5; }
+  .space-b { grid-column: 7 / span 6; margin-top: clamp(80px, 12vw, 160px); }
+  .menu-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .plate { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr) auto; align-items: end; }
+  .foot .plate { grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .contact-info { grid-column: 1 / span 6; }
+  .contact-map { grid-column: 8 / -1; }
+}
+@media (max-width: 860px) {
+  .courses, .facts, .foot-cols { grid-template-columns: minmax(0, 1fr); }
+  .form { grid-template-columns: minmax(0, 1fr); }
+  .row .label { flex-basis: 100%; }
+  .nav { gap: 18px; }
+  .hero-photo { order: -1; }
+}
+@media (prefers-reduced-motion: reduce) { .btn, .textlink { transition: none; } .open i::after { animation: none; } }
+</style>
+
+</head>
+<body>
+<div class="bgscene" aria-hidden="true">
+  <svg id="bgsvg" viewBox="0 0 600 480" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+              <defs>
+                <clipPath id="glassClip"><path d="M190 190 L210 385 Q212 400 230 400 L310 400 Q328 400 330 385 L350 190 Z"/></clipPath>
+                <linearGradient id="gCoffee" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6a4326"/><stop offset="1" stop-color="#2a1a10"/></linearGradient>
+                <linearGradient id="gJug" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8d867a"/><stop offset="1" stop-color="#3a352e"/></linearGradient>
+                <linearGradient id="gSaucer" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9b0a0"/><stop offset="1" stop-color="#5f584d"/></linearGradient>
+              </defs>
+              <g transform="translate(-15 18)">
+                <ellipse cx="270" cy="406" rx="150" ry="15" fill="url(#gSaucer)" stroke="rgba(255,245,230,.35)" stroke-width="1"/>
+                <ellipse cx="270" cy="402" rx="62" ry="6" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="1"/>
+                <g clip-path="url(#glassClip)">
+                  <g class="level">
+                    <rect x="170" y="215" width="200" height="230" fill="url(#gCoffee)"/>
+                    <ellipse cx="270" cy="215" rx="100" ry="7" fill="#d2a574" opacity=".9"/>
+                    <ellipse class="ripple" cx="270" cy="215" rx="16" ry="3" fill="none" stroke="rgba(255,235,205,.8)" stroke-width="1"/>
+                  </g>
+                </g>
+                <path d="M190 190 L210 385 Q212 400 230 400 L310 400 Q328 400 330 385 L350 190" fill="rgba(255,245,230,.05)" stroke="rgba(255,245,230,.6)" stroke-width="1.5" stroke-linejoin="round"/>
+                <ellipse cx="270" cy="190" rx="80" ry="7" fill="none" stroke="rgba(255,245,230,.5)" stroke-width="1.2"/>
+                <path d="M203 205 L217 375" stroke="rgba(255,255,255,.22)" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <rect class="stream" x="267.5" y="112" width="5" height="285" rx="2.5" fill="#7a4f2d"/>
+                <g class="steam" fill="none" stroke="rgba(255,245,230,.4)" stroke-width="1.5" stroke-linecap="round">
+                  <path class="st st1" d="M232 176 C222 160 242 150 232 134 C224 122 238 114 234 102"/>
+                  <path class="st st2" d="M262 176 C252 162 272 152 262 138"/>
+                </g>
+                <g transform="translate(266 108) rotate(-30)">
+                  <path d="M150 14 C196 8 196 84 140 80" fill="none" stroke="rgba(255,245,230,.55)" stroke-width="5" stroke-linecap="round"/>
+                  <path d="M22 0 L0 -7 L30 18 L34 90 Q36 104 52 104 L124 104 Q140 104 142 90 L150 0 Z" fill="url(#gJug)" stroke="rgba(255,245,230,.45)" stroke-width="1" stroke-linejoin="round"/>
+                  <path d="M22 0 L150 0" stroke="rgba(255,245,230,.5)" stroke-width="1.2"/>
+                  <path d="M48 20 L52 92" stroke="rgba(255,255,255,.18)" stroke-width="2" stroke-linecap="round"/>
+                </g>
+              </g>
+            </svg>
+</div>
+
+<div class="wrap">
+  <div class="demo">Демо-версия. Название, цены и фото условные, это пример сайта для вашего кафе.</div>
+
+  <header class="top">
+    <a class="brand" href="#home" aria-label="Кофейня Макет, на главную">
+      <span class="brand-name">Макет</span>
+      <span class="brand-sub">кофейня</span>
+    </a>
+    <nav class="nav" aria-label="Разделы сайта">
+      <a class="link" href="#home" id="nav-home">Главная</a>
+      <a class="link" href="#contacts" id="nav-contacts">Контакты</a>
+      <a class="btn is-outline" href="#contacts">Забронировать</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ГЛАВНАЯ -->
+    <div id="view-home">
+      <section class="hero grid">
+        <div class="hero-side">
+          <h1>Свежая обжарка. Завтраки до&nbsp;полудня.</h1>
+          <p class="lead">Небольшая кофейня в Минске. Обжариваем зерно малыми партиями, печём выпечку на месте.</p>
+          <div class="hero-actions">
+            <a class="btn" href="#contacts">Забронировать столик</a>
+            <button class="textlink" type="button" id="go-menu">Смотреть меню</button>
+          </div>
+          <div class="open" aria-live="polite"><i aria-hidden="true"></i><span id="open-text">Открыто ежедневно</span></div>
+        </div>
+        <figure class="photo hero-photo">
+          <div class="frame p-a" style="--ratio: 5 / 4" role="img" aria-label="Место для фотографии зала"><span class="tag">Фото</span></div>
+          <figcaption class="caption">Зал утром. Здесь будет фотография вашего заведения.</figcaption>
+        </figure>
+      </section>
+
+      <section class="section grid" aria-label="О кофейне">
+        <figure class="photo story-photo">
+          <div class="frame p-b" style="--ratio: 4 / 5" role="img" aria-label="Место для фотографии бариста"><span class="tag">Фото</span></div>
+        </figure>
+        <div class="story-text">
+          <p class="big">Мы начали с одной кофемашины и хорошего зерна. Сегодня меню то же самое: понятное и без лишнего.</p>
+          <div class="facts">
+            <div><b>Обжарка</b>Малыми партиями, раз в неделю</div>
+            <div><b>Выпечка</b>Печём каждое утро</div>
+            <div><b>Зал</b>24 места, можно с собакой</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="menu" aria-labelledby="menu-title">
+        <div class="menu-head">
+          <h2 id="menu-title">Меню</h2>
+          <span class="label">Цены в белорусских рублях</span>
+        </div>
+        <div class="menu-cols">
+          <div>
+            <div class="group">
+              <div class="label"><span>Кофе</span><span>100% арабика</span></div>
+              <div class="item"><span class="name">Эспрессо</span><span class="price">3,50</span></div>
+              <div class="item"><span class="name">Американо</span><span class="price">4,50</span></div>
+              <div class="item"><span class="name">Капучино</span><span class="price">5,50</span></div>
+              <div class="item"><span class="name">Флэт уайт</span><span class="price">6,50</span></div>
+              <div class="item"><span class="name">Раф ванильный</span><span class="price">7,50</span></div>
+              <div class="item"><span class="name">Фильтр-кофе<span class="note">кофе дня, 300 мл</span></span><span class="price">5,00</span></div>
+            </div>
+            <div class="group">
+              <div class="label"><span>Чай и холодное</span></div>
+              <div class="item"><span class="name">Лимонад облепиха-имбирь</span><span class="price">6,50</span></div>
+              <div class="item"><span class="name">Облепиховый чай<span class="note">чайник 500 мл</span></span><span class="price">9,00</span></div>
+              <div class="item"><span class="name">Какао</span><span class="price">6,00</span></div>
+              <div class="item"><span class="name">Морс клюквенный</span><span class="price">5,00</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="group">
+              <div class="label"><span>Завтраки</span><span>до 12:00</span></div>
+              <div class="item"><span class="name">Сырники со сметаной<span class="note">3 штуки, 220 г</span></span><span class="price">11,00</span></div>
+              <div class="item"><span class="name">Овсяная каша с яблоком и корицей</span><span class="price">8,50</span></div>
+              <div class="item"><span class="name">Омлет с зеленью и сыром</span><span class="price">9,50</span></div>
+              <div class="item"><span class="name">Яйцо пашот на тосте с авокадо</span><span class="price">14,50</span></div>
+              <div class="item"><span class="name">Драники с лососем</span><span class="price">16,90</span></div>
+            </div>
+            <div class="group">
+              <div class="label"><span>Выпечка</span><span>свежая каждый день</span></div>
+              <div class="item"><span class="name">Круассан</span><span class="price">4,80</span></div>
+              <div class="item"><span class="name">Эклер ванильный</span><span class="price">5,50</span></div>
+              <div class="item"><span class="name">Яблочный штрудель</span><span class="price">7,00</span></div>
+              <div class="item"><span class="name">Чизкейк Нью-Йорк</span><span class="price">8,90</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="plate">
+          <div>
+            <span class="label">Пн-пт, 12:00-16:00</span>
+            <h2>Бизнес-ланч</h2>
+          </div>
+          <div class="courses">
+            <div><b>Суп</b>Суп дня</div>
+            <div><b>Горячее</b>Основное блюдо с гарниром</div>
+            <div><b>Напиток</b>Компот или чай</div>
+          </div>
+          <div class="lunch-price">14,00<small>Br</small></div>
+        </div>
+      </section>
+
+      <section class="section grid" aria-label="Пространство">
+        <figure class="photo space-a">
+          <div class="frame p-c" style="--ratio: 4 / 5" role="img" aria-label="Место для фотографии зала"><span class="tag">Фото</span></div>
+          <figcaption class="caption">Зал у окна.</figcaption>
+        </figure>
+        <figure class="photo space-b">
+          <div class="frame p-d" style="--ratio: 3 / 2" role="img" aria-label="Место для фотографии стойки"><span class="tag">Фото</span></div>
+          <figcaption class="caption">Барная стойка вечером.</figcaption>
+        </figure>
+      </section>
+    </div>
+
+    <!-- КОНТАКТЫ -->
+    <div id="view-contacts" hidden>
+      <section class="page-head">
+        <h1>Контакты</h1>
+      </section>
+
+      <section class="section grid">
+        <div class="contact-info rows">
+          <div class="row">
+            <span class="label">Адрес</span>
+            <span class="val">г. Минск, ул. Примерная, 1<small>Вход со стороны двора</small></span>
+          </div>
+          <div class="row">
+            <span class="label">Телефон</span>
+            <span class="val" id="phone-text">+375 29 000-00-00</span>
+            <button class="btn is-small" type="button" data-copy="phone-text">Скопировать</button>
+          </div>
+          <div class="row">
+            <span class="label">Telegram</span>
+            <span class="val" id="tg-text">@ваш_аккаунт</span>
+            <button class="btn is-small" type="button" data-copy="tg-text">Скопировать</button>
+          </div>
+          <div class="row">
+            <span class="label">Часы работы</span>
+            <span class="val" style="font-family: var(--font-sans); font-size: 16px">
+              <table class="hours" aria-label="Часы работы">
+                <tr><td>Понедельник - пятница</td><td>8:00 - 22:00</td></tr>
+                <tr><td>Суббота</td><td>9:00 - 23:00</td></tr>
+                <tr><td>Воскресенье</td><td>9:00 - 22:00</td></tr>
+              </table>
+            </span>
+          </div>
+        </div>
+
+        <figure class="map contact-map">
+          <svg viewBox="0 0 400 360" role="img" aria-label="Схема проезда, здесь будет карта" preserveAspectRatio="xMidYMid slice">
+            <path class="m-line" d="M0 70 H400 M0 150 H400 M0 290 H400 M60 0 V360 M170 0 V360 M310 0 V360" />
+            <path class="m-main" d="M0 220 H400 M240 0 V360" />
+            <rect class="m-block" x="72" y="82" width="86" height="56" />
+            <rect class="m-block" x="182" y="82" width="46" height="56" />
+            <rect class="m-block" x="252" y="82" width="46" height="56" />
+            <rect class="m-block" x="72" y="162" width="86" height="46" />
+            <rect class="m-block" x="252" y="232" width="46" height="46" />
+            <rect class="m-block" x="72" y="232" width="86" height="46" />
+            <circle class="m-ring" cx="240" cy="220" r="20" />
+            <circle class="m-dot" cx="240" cy="220" r="6" />
+            <text class="m-text" x="268" y="206">МАКЕТ</text>
+          </svg>
+          <figcaption>Здесь будет карта 2ГИС или Яндекс Карт с точкой вашего кафе.</figcaption>
+        </figure>
+      </section>
+
+      <section class="section" aria-labelledby="book-title">
+        <h2 id="book-title">Забронировать <em>столик</em></h2>
+        <form class="form" id="book-form" novalidate>
+          <div class="field"><label for="f-name">Имя</label><input id="f-name" name="name" type="text" autocomplete="name" required></div>
+          <div class="field"><label for="f-phone">Телефон</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" placeholder="+375" required></div>
+          <div class="field"><label for="f-date">Дата</label><input id="f-date" name="date" type="date" required></div>
+          <div class="field"><label for="f-guests">Гостей</label><input id="f-guests" name="guests" type="number" min="1" max="12" value="2" required></div>
+          <label class="consent" for="f-consent">
+            <input id="f-consent" name="consent" type="checkbox" required>
+            <span>Согласен на обработку персональных данных в соответствии с <u>политикой конфиденциальности</u>. На рабочем сайте здесь будет ссылка.</span>
+          </label>
+          <div class="form-actions">
+            <button class="btn" type="submit">Отправить заявку</button>
+            <span class="status" id="form-status" role="status"></span>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="plate">
+      <div>
+        <span class="label">Ждём вас</span>
+        <h2>Ул. Примерная, 1, Минск</h2>
+      </div>
+      <div class="foot-cols">
+        <div><b style="font-weight:500">Часы работы</b><br>8:00 - 22:00, ежедневно</div>
+        <div><b style="font-weight:500">Телефон</b><br>+375 29 000-00-00</div>
+        <div><b style="font-weight:500">Telegram</b><br>@ваш_аккаунт</div>
+      </div>
+      <p class="legal">Демонстрационная страница, данные вымышленные, форма ничего не отправляет и не сохраняет. На рабочем сайте здесь будут данные владельца: ООО «Пример», УНП 000000000, г. Минск, ул. Примерная, 1, режим работы 8:00-22:00.</p>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var views = { home: document.getElementById("view-home"), contacts: document.getElementById("view-contacts") };
+  var navs = { home: document.getElementById("nav-home"), contacts: document.getElementById("nav-contacts") };
+
+  function route() {
+    var name = (location.hash || "").replace("#", "");
+    if (!views[name]) name = "home";
+    Object.keys(views).forEach(function (k) {
+      views[k].hidden = k !== name;
+      if (k === name) navs[k].setAttribute("aria-current", "page");
+      else navs[k].removeAttribute("aria-current");
+    });
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener("hashchange", route);
+  route();
+
+  document.getElementById("go-menu").addEventListener("click", function () {
+    var el = document.getElementById("menu");
+    if (el && el.scrollIntoView) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  /* открыто или закрыто сейчас, по времени Минска и по графику из таблицы */
+  var schedule = { Mon: [8, 22], Tue: [8, 22], Wed: [8, 22], Thu: [8, 22], Fri: [8, 22], Sat: [9, 23], Sun: [9, 22] };
+  function updateOpen() {
+    try {
+      var parts = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Minsk", weekday: "short", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(new Date());
+      var wd = "Mon", h = 0, m = 0;
+      parts.forEach(function (p) {
+        if (p.type === "weekday") wd = p.value;
+        if (p.type === "hour") h = parseInt(p.value, 10) % 24;
+        if (p.type === "minute") m = parseInt(p.value, 10);
+      });
+      var s = schedule[wd] || [8, 22];
+      var now = h * 60 + m;
+      var open = now >= s[0] * 60 && now < s[1] * 60;
+      document.getElementById("open-text").textContent = open
+        ? "Сейчас открыто, до " + s[1] + ":00"
+        : (now < s[0] * 60 ? "Сейчас закрыто, откроемся в " + s[0] + ":00" : "Сейчас закрыто, откроемся завтра");
+    } catch (e) { /* остаётся текст по умолчанию */ }
+  }
+  updateOpen();
+
+  function selectText(el) {
+    var r = document.createRange();
+    r.selectNodeContents(el);
+    var s = window.getSelection();
+    s.removeAllRanges();
+    s.addRange(r);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function (btn) {
+    btn.addEventListener("click", function () {
+      var el = document.getElementById(btn.getAttribute("data-copy"));
+      var old = btn.textContent;
+      function done(ok) {
+        btn.textContent = ok ? "Скопировано" : "Выделено";
+        setTimeout(function () { btn.textContent = old; }, 1600);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(el.textContent).then(function () { done(true); }, function () { selectText(el); done(false); });
+      } else { selectText(el); done(false); }
+    });
+  });
+
+  /* лёгкий 3D-наклон фоновой чашки за курсором (только мышь, без reduced motion) */
+  var bg = document.getElementById("bgsvg");
+  if (bg && window.matchMedia("(hover: hover)").matches && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    window.addEventListener("mousemove", function (e) {
+      var x = e.clientX / window.innerWidth - .5, y = e.clientY / window.innerHeight - .5;
+      bg.style.transform = "rotateY(" + (x * 10).toFixed(2) + "deg) rotateX(" + (-y * 10).toFixed(2) + "deg)";
+    });
+  }
+
+  var form = document.getElementById("book-form");
+  var status = document.getElementById("form-status");
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!form.checkValidity()) {
+      status.textContent = "Заполните все поля и поставьте галочку согласия.";
+      if (form.reportValidity) form.reportValidity();
+      return;
+    }
+    status.textContent = "Это демо: заявка никуда не отправляется. На рабочем сайте она придёт владельцу на e-mail.";
+  });
+})();
+</script>
+</body>
+</html>
